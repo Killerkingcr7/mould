@@ -1,21 +1,22 @@
-require('dotenv').config(); // Add this at the top if using a .env locally
+// Remove dotenv require in production on Render
+// require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
+// Optional: serve static from 'public' folder if needed
+// app.use(express.static('public'));
 
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 let servicesCollection;
 
-// Connect to MongoDB
 async function connectToMongo() {
   try {
     await client.connect();
@@ -30,7 +31,6 @@ connectToMongo();
 
 app.get('/', (req, res) => res.send('🟢 Server is running'));
 
-// POST service
 app.post('/post-service', async (req, res) => {
   if (!servicesCollection) return res.status(500).json({ error: "DB not ready" });
 
@@ -46,7 +46,6 @@ app.post('/post-service', async (req, res) => {
   }
 });
 
-// GET all services
 app.get('/get-services', async (req, res) => {
   if (!servicesCollection) return res.status(500).json({ error: "DB not ready" });
 
@@ -60,5 +59,5 @@ app.get('/get-services', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
