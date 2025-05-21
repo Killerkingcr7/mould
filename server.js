@@ -1,59 +1,57 @@
 const express = require('express');
-const app = express();
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 
-const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI;  // Set this in Render environment variables
+const app = express();
+const PORT = 3000;
 
 app.use(cors());
-app.use(express.json());
-app.use(express.static('public'));
+app.use(bodyParser.json());
+app.use(express.static(__dirname));
 
+const uri = "mongodb+srv://Bigmoney02800:Calebmurimi%401@cluster0.mongodb.net/?retryWrites=true&w=majority"; // Replace with actual cluster
+const client = new MongoClient(uri);
 let servicesCollection;
 
 // Connect to MongoDB
-async function connectDB() {
+async function connectToMongo() {
   try {
-    const client = new MongoClient(MONGO_URI);
     await client.connect();
-    const db = client.db('mould');
-    servicesCollection = db.collection('services');
-    console.log('✅ Connected to MongoDB');
+    const db = client.db("mould"); // You can name the DB anything
+    servicesCollection = db.collection("services");
+    console.log("✅ Connected to MongoDB");
   } catch (err) {
-    console.error('❌ MongoDB connection error:', err);
+    console.error("❌ MongoDB connection failed:", err);
   }
 }
-connectDB();
+connectToMongo();
 
 // POST service
-app.post('/api/services', async (req, res) => {
-  const { type, description } = req.body;
-  if (!type || !description) {
-    return res.status(400).json({ message: 'Missing fields' });
-  }
+app.post('/post-service', async (req, res) => {
   try {
-    const result = await servicesCollection.insertOne({ type, description, createdAt: new Date() });
-    res.status(201).json({ id: result.insertedId, type, description });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Failed to save service' });
+    const post = req.body;
+    if (!post.name || !post.service) return res.json({ success: false });
+
+    const result = await servicesCollection.insertOne(post);
+    res.json({ success: true, insertedId: result.insertedId });
+  } catch (error) {
+    console.error(error);
+    res.json({ success: false });
   }
 });
 
-// GET services
-app.get('/api/services', async (req, res) => {
+// GET all services
+app.get('/get-services', async (req, res) => {
   try {
     const services = await servicesCollection.find({}).toArray();
     res.json(services);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Failed to fetch services' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch services' });
   }
 });
 
-// Auth routes (if you have them)
-const authRoutes = require('./auth');
-app.use('/auth', authRoutes);
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
