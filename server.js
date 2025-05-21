@@ -1,62 +1,59 @@
 const express = require('express');
+const app = express();
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 
-const app = express();
 const PORT = process.env.PORT || 3000;
+const MONGO_URI = process.env.MONGO_URI;  // Set this in Render environment variables
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static(__dirname));
-
-// Use environment variable for Mongo URI, fallback to your URI (not recommended for production)
-const uri = process.env.MONGO_URI || "mongodb+srv://Bigmoney02800:Calebmurimi%401@cluster0.mongodb.net/?retryWrites=true&w=majority";
-
-const client = new MongoClient(uri);
+app.use(express.json());
+app.use(express.static('public'));
 
 let servicesCollection;
 
-async function connectToMongo() {
+// Connect to MongoDB
+async function connectDB() {
   try {
+    const client = new MongoClient(MONGO_URI);
     await client.connect();
-    const db = client.db("mould"); // DB name
-    servicesCollection = db.collection("services");
-    console.log("✅ Connected to MongoDB");
-
-    // Start server only after DB connection is established
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-    });
+    const db = client.db('mould');
+    servicesCollection = db.collection('services');
+    console.log('✅ Connected to MongoDB');
   } catch (err) {
-    console.error("❌ MongoDB connection failed:", err);
-    process.exit(1); // Exit app if DB connection fails
+    console.error('❌ MongoDB connection error:', err);
   }
 }
+connectDB();
 
-connectToMongo();
-
-app.post('/post-service', async (req, res) => {
+// POST service
+app.post('/api/services', async (req, res) => {
+  const { type, description } = req.body;
+  if (!type || !description) {
+    return res.status(400).json({ message: 'Missing fields' });
+  }
   try {
-    const post = req.body;
-    if (!post.name || !post.service) {
-      return res.json({ success: false, message: "Missing required fields" });
-    }
-
-    const result = await servicesCollection.insertOne(post);
-    res.json({ success: true, insertedId: result.insertedId });
-  } catch (error) {
-    console.error(error);
-    res.json({ success: false, message: "Error inserting service" });
+    const result = await servicesCollection.insertOne({ type, description, createdAt: new Date() });
+    res.status(201).json({ id: result.insertedId, type, description });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to save service' });
   }
 });
 
-app.get('/get-services', async (req, res) => {
+// GET services
+app.get('/api/services', async (req, res) => {
   try {
     const services = await servicesCollection.find({}).toArray();
     res.json(services);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch services' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch services' });
   }
 });
+
+// Auth routes (if you have them)
+const authRoutes = require('./auth');
+app.use('/auth', authRoutes);
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
