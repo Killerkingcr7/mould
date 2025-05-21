@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Post Your Services</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f3;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #28a745;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .post-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+      margin: 0 auto 40px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .post-form input,
+    .post-form textarea {
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+
+    .post-form button {
+      padding: 10px;
+      border: none;
+      background-color: #28a745;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .post-form button:hover {
+      background-color: #218838;
+    }
+
+    .material-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .material-card {
+      background-color: white;
+      padding: 15px;
+      width: 250px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .material-card h3 {
+      margin-top: 0;
+      color: #28a745;
+    }
+
+    .material-card p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h2>Post Your Work</h2>
+  </header>
+
+  <main>
+    <form id="postForm" class="post-form">
+      <input type="text" id="name" placeholder="Your Name" required>
+      <input type="text" id="contact" placeholder="Your Contact" required>
+      <input type="text" id="service" placeholder="Type of Service (e.g. sand, delivery)" required>
+      <input type="text" id="price" placeholder="Price or Rate" required>
+      <input type="text" id="hours" placeholder="Working Hours" required>
+      <input type="text" id="location" placeholder="Your Location" required>
+      <textarea id="description" placeholder="Describe your service" required></textarea>
+      <input type="file" id="image" required>
+      <button type="submit">Post Service</button>
+    </form>
+
+    <section id="postsList" class="material-list">
+      <!-- Posted services will show here -->
+    </section>
+  </main>
+
+<script>
+  const form = document.getElementById('postForm');
+  const postsList = document.getElementById('postsList');
+  
+  const loadPosts = () => {
+    // Optional: You could also fetch existing posts from MongoDB if you create a GET endpoint
+    postsList.innerHTML = `<p>Posts will appear here after submission.</p>`;
+  };
+  
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    
+    // Gather form data
+    const post = {
+      name: form.name.value,
+      contact: form.contact.value,
+      service: form.service.value,
+      price: form.price.value,
+      hours: form.hours.value,
+      location: form.location.value,
+      description: form.description.value,
+      image: form.image.files[0]?.name || 'No image'
+    };
+    
+    // Check if the form fields are filled out
+    if (!post.name || !post.contact || !post.service || !post.price || !post.hours || !post.location || !post.description) {
+      alert("Please fill all fields before submitting.");
+      return;
+    }
+    
+    // Send data to backend
+    fetch('http://localhost:3000/post-service', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(post)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert("Service Posted to MongoDB!");
+          form.reset(); // Reset form after successful post
+          loadPosts(); // Optional update for UI
+        } else {
+          alert("Failed to post service.");
+        }
+      })
+      .catch(err => {
+        console.error("Error posting service:", err);
+        alert("Error posting service. Check the console for details.");
+      });
+  });
+  
+  loadPosts();
+</script>
+
+</body>
+</html>

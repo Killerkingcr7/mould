@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Construction Materials</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 10px 0;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .role-selection {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    .role-selection h2 {
+      margin-bottom: 30px;
+    }
+
+    .roles {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .role-card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      width: 200px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .role-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .role-card strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 100px;
+      padding: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Construction Materials</h1>
+      <p>Preview</p>
+    </header>
+
+    <hr />
+
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Browse Materials</a>
+      <a href="#">Orders</a>
+    </nav>
+
+    <hr />
+
+    <div class="role-selection">
+      <h2>Who Are You?</h2>
+
+      <div class="roles">
+        <div class="role-card" onclick="selectUserType('client')">
+          <strong>Client</strong>
+          <p>I want to order materials</p>
+        </div>
+
+        <div class="role-card" onclick="selectUserType('seller')">
+          <strong>Seller</strong>
+          <p>I sell construction materials</p>
+        </div>
+
+        <div class="role-card" onclick="selectUserType('transporter')">
+          <strong>Transporter</strong>
+          <p>I deliver construction materials</p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      &copy; 2025 Construction Materials
+    </footer>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.name) {
+      // Only works if you have an element with id 'userName'
+      const nameElement = document.getElementById('userName');
+      if (nameElement) {
+        nameElement.innerText = user.name;
+      }
+    }
+
+    function selectUserType(type) {
+      localStorage.setItem('userType', type);
+      if (type === 'seller' || type === 'transporter') {
+        window.location.href = 'provider.html';
+      } else if (type === 'client') {
+        window.location.href = 'client.html';
+      }
+    }
+  </script>
+</body>
+</html>

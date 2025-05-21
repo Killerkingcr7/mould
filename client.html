@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Available Services</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #007bff;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .material-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      padding: 20px;
+    }
+    .material-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 15px;
+      width: 280px;
+    }
+    .material-card h3 {
+      margin: 0;
+      color: #007bff;
+    }
+    .material-card p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Available Services</h2>
+  </header>
+
+  <main>
+    <div id="postsList" class="material-list">Loading...</div>
+  </main>
+
+  <script>
+    fetch('http://localhost:3000/get-services')
+      .then(res => res.json())
+      .then(data => {
+        const postsList = document.getElementById('postsList');
+        if (!data.length) {
+          postsList.innerHTML = "<p>No services available.</p>";
+          return;
+        }
+
+        postsList.innerHTML = data.map(post => `
+          <div class="material-card">
+            <h3>${post.service}</h3>
+            <p><strong>By:</strong> ${post.name}</p>
+            <p><strong>Contact:</strong> ${post.contact}</p>
+            <p><strong>Price:</strong> ${post.price}</p>
+            <p><strong>Hours:</strong> ${post.hours}</p>
+            <p><strong>Location:</strong> ${post.location}</p>
+            <p>${post.description}</p>
+          </div>
+        `).join('');
+      })
+      .catch(err => {
+        console.error("Failed to fetch services:", err);
+        document.getElementById('postsList').innerHTML = "<p>Could not load services.</p>";
+      });
+  </script>
+</body>
+</html>
